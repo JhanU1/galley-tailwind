@@ -59,14 +59,20 @@ function clickBtnAgregar() {
     }
 
     const images = getItemByKey("images");
-    console.log(images);
+
     if (images) {
       images.push(image);
       setItem("images", images);
     } else {
       setItem("images", [image]);
     }
-    containerImages.innerHTML += getHtmlImage(image);
+
+    const page = getAmountPages();
+
+    pushPaginationHtml();
+    selectPaginationHmlt(page);
+    pushImagesPageHtml(page);
+    clicBtnsPagination();
   });
 }
 
@@ -130,10 +136,15 @@ function addImagesToHtml(images) {
 function pushImagesPageHtml(page) {
   removeAllImagesFromHtml();
   const images = getItemByKey("images");
-  console.log(images);
   if (images) {
-    console.log(images.slice((page - 1) * 12, page * 12));
     addImagesToHtml(images.slice((page - 1) * 12, page * 12));
+    const cbi = document.getElementById("container_bfimages");
+    console.log(cbi);
+    if (cbi) {
+      if (cbi.className.includes("hidden")) {
+        cbi.className = cbi.className.replace(" hidden", "");
+      }
+    }
   }
 }
 
@@ -154,19 +165,25 @@ function createElementFromHTML(htmlString) {
 function pushPaginationHtml() {
   const amountPages = getAmountPages();
   if (amountPages) {
-    if (amountPages > 1) {
+    if (amountPages >= 1) {
+      if (containerPagination.className.includes("hidden")) {
+        containerPagination.className = containerPagination.className.replace(
+          " hidden",
+          ""
+        );
+      }
       if (listPages.childNodes.length > 2) {
         for (let index = 1; index <= listPages.children.length - 1; index++) {
           listPages.removeChild(listPages.children[index]);
         }
       }
       listPages.innerHTML = `
-    <li class="page-item disabled">
-      <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-500 pointer-events-none focus:shadow-none"
-        href="#" tabindex="-1" aria-disabled="true">Anterior</a>
-    </li>
-    `;
-      
+          <li class="page-item disabled">
+            <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-500 pointer-events-none focus:shadow-none"
+              href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+          </li>
+      `;
+
       for (let i = 1; i <= amountPages; i++) {
         listPages.innerHTML += getPaginationHTML(i);
       }
@@ -175,7 +192,6 @@ function pushPaginationHtml() {
     <li class="page-item">
     <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-800 hover:text-gray-800 hover:bg-gray-200 focus:shadow-none"
     href="#">Siguiente</a></li>`;
-
     } else {
       containerPagination.className = "container hidden";
     }
