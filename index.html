@@ -28,10 +28,10 @@
 
     <div class="container mx-auto mt-10 w-3/5 rounded-lg shadow-lg bg-white p-10 bg-indigo-100">
         <div class="flex justify-center mb-5">
-            <p class="font-extrabold text-transparent text-8xl bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Galeria</p>
+            <p
+                class="font-extrabold text-transparent text-8xl bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                Galeria</p>
         </div>
-        <div class="flex flex-row justify-center mb-10 mt-10">Agrega una imagen:</div>
-
         <form>
             <div class="form-group">
                 <label for="exampleInputEmail1" class="form-label inline-block mb-2 text-gray-700">Titulo</label>
@@ -74,7 +74,7 @@
 
                     <input
                         class="form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-                        type="file" id="input_file">
+                        type="file" id="input_file" accept="image/png, image/gif, image/jpeg">
 
 
                     <input type="text"
@@ -90,31 +90,18 @@
         </form>
 
     </div>
-    <div class="container mx-auto mt-5 w-3/4  rounded-lg shadow-lg bg-white p-5 bg-indigo-100 hidden" id="container_bfimages">
+    <div class="container mx-auto mt-5 w-3/4  rounded-lg shadow-lg bg-white p-5 bg-indigo-100 hidden"
+        id="container_bfimages">
         <div class="grid grid-cols-4 gap-4" id="container_images">
 
         </div>
     </div>
     <div class="flex justify-center my-10" id="container_pagination">
-        <nav >
+        <nav>
             <ul class="flex list-style-none" id="list_pages">
-                <li class="page-item disabled">
-                    <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-500 pointer-events-none focus:shadow-none"
-                        href="#" tabindex="-1" aria-disabled="true">Anterior</a>
-                </li>
-
-                <li class="page-item"><a
-                        class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-800 hover:text-gray-800 hover:bg-gray-200 focus:shadow-none"
-                        href="#">Siguiente</a></li>
             </ul>
         </nav>
     </div>
-
-
-
-
-
-
 
     <script src="https://unpkg.com/@popperjs/core@2.9.1/dist/umd/popper.min.js" charset="utf-8"></script>
     <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/index.min.js"></script>

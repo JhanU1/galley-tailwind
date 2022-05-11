@@ -48,31 +48,44 @@ function clickBtnAgregar() {
     let url = inputUrl.value;
     let titulo = inputTitulo.value;
     let descrip = inputDescription.value;
-    const image = {
-      url: url,
-      titulo: titulo,
-      description: descrip,
-    };
-    if (btnDropDown.childNodes[0].nodeValue !== "URL") {
-      url = await getUrl(inputFile.files[0]);
-      image.url = url;
-    }
-
-    const images = getItemByKey("images");
-
-    if (images) {
-      images.push(image);
-      setItem("images", images);
+    if (titulo.trim() === "" || descrip.trim() === "") {
+      alert("Todos los campos son obligatorios");
     } else {
-      setItem("images", [image]);
+      const image = {
+        url: url,
+        titulo: titulo,
+        description: descrip,
+      };
+      if (btnDropDown.childNodes[0].nodeValue !== "URL") {
+        try {
+          url = await getUrl(inputFile.files[0]);
+        } catch (error) {
+          url = undefined;
+        }
+        if (url !== undefined && url !== "") {
+          image.url = url;
+          const images = getItemByKey("images");
+
+          if (images) {
+            images.push(image);
+            setItem("images", images);
+          } else {
+            setItem("images", [image]);
+          }
+
+          const page = getAmountPages();
+          alert("Imagen agregada");
+          pushPaginationHtml();
+          setLastPageSelected(page);
+          selectPaginationHmlt(page);
+          pushImagesPageHtml(page);
+          clicBtnsPagination();
+          listenerPopovers();
+        } else {
+          alert("Error al agregar imagen");
+        }
+      }
     }
-
-    const page = getAmountPages();
-
-    pushPaginationHtml();
-    selectPaginationHmlt(page);
-    pushImagesPageHtml(page);
-    clicBtnsPagination();
   });
 }
 
@@ -82,14 +95,40 @@ function clicBtnsPagination() {
   btns_pagination.forEach((item) => {
     item.addEventListener("click", (e) => {
       const val = item.children[0].innerHTML.split(" ")[0];
-      console.log("click Page:", val);
+
       if (/[0-9]/i.test(val)) {
         const page = parseInt(val);
         pushPaginationHtml();
         pushImagesPageHtml(page);
         selectPaginationHmlt(page);
+        setLastPageSelected(page);
         clicBtnsPagination();
         listenerPopovers();
+      } else {
+        const lastPage = getLastPageSelected();
+        if (lastPage) {
+          if (val.includes("Siguiente")) {
+            if (lastPage < getAmountPages()) {
+              pushPaginationHtml();
+              pushImagesPageHtml(lastPage + 1);
+              selectPaginationHmlt(lastPage + 1);
+              setLastPageSelected(lastPage + 1);
+              clicBtnsPagination();
+              listenerPopovers();
+            }
+          } else {
+            if (val.includes("Anterior")) {
+              if (lastPage > 1) {
+                pushPaginationHtml();
+                pushImagesPageHtml(lastPage - 1);
+                selectPaginationHmlt(lastPage - 1);
+                setLastPageSelected(lastPage - 1);
+                clicBtnsPagination();
+                listenerPopovers();
+              }
+            }
+          }
+        }
       }
     });
   });
@@ -139,7 +178,6 @@ function pushImagesPageHtml(page) {
   if (images) {
     addImagesToHtml(images.slice((page - 1) * 12, page * 12));
     const cbi = document.getElementById("container_bfimages");
-    console.log(cbi);
     if (cbi) {
       if (cbi.className.includes("hidden")) {
         cbi.className = cbi.className.replace(" hidden", "");
@@ -149,11 +187,38 @@ function pushImagesPageHtml(page) {
 }
 
 function selectPaginationHmlt(page) {
+  const amount = getAmountPages();
   listPages.children[page].innerHTML = `
-    <a
-      class="page-link relative block py-1.5 px-3 border-0 bg-blue-600 outline-none transition-all duration-300 rounded-full text-white hover:text-white hover:bg-blue-600 shadow-md focus:shadow-md"
-      href="#">${page} <span class="visually-hidden">(current) </span>
-    </a>`;
+  <a
+    class="page-link relative block py-1.5 px-3 border-0 bg-blue-600 outline-none transition-all duration-300 rounded-full text-white hover:text-white hover:bg-blue-600 shadow-md focus:shadow-md"
+    href="#">${page} <span class="visually-hidden">(current) </span>
+  </a>`;
+  if (page === 1) {
+    listPages.children[0].innerHTML = `                
+    <li class="page-item disabled">
+      <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-500 pointer-events-none focus:shadow-none"
+        href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+    </li>
+`;
+  } else if (page === amount) {
+    listPages.children[amount + 1].innerHTML = `                
+    <li class="page-item disabled">
+      <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-500 pointer-events-none focus:shadow-none"
+        href="#" tabindex="-1" aria-disabled="true">Siguiente</a>
+    </li>
+`;
+  } else {
+    listPages.children[0].innerHTML = `                
+    <li class="page-item"><a
+    class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-800 hover:text-gray-800 hover:bg-gray-200 focus:shadow-none"
+    href="#">Anterior</a></li>
+`;
+    listPages.children[amount].innerHTML = `                
+    <li class="page-item"><a
+    class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-800 hover:text-gray-800 hover:bg-gray-200 focus:shadow-none"
+    href="#">Siguiente</a></li>
+    `;
+  }
 }
 
 function createElementFromHTML(htmlString) {
@@ -178,10 +243,10 @@ function pushPaginationHtml() {
         }
       }
       listPages.innerHTML = `
-          <li class="page-item disabled">
-            <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-500 pointer-events-none focus:shadow-none"
-              href="#" tabindex="-1" aria-disabled="true">Anterior</a>
-          </li>
+      <li class="page-item">
+        <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-800 hover:text-gray-800 hover:bg-gray-200 focus:shadow-none"
+          href="#">Anterior</a>
+      </li>
       `;
 
       for (let i = 1; i <= amountPages; i++) {
@@ -189,9 +254,11 @@ function pushPaginationHtml() {
       }
 
       listPages.innerHTML += `  
-    <li class="page-item">
-    <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-800 hover:text-gray-800 hover:bg-gray-200 focus:shadow-none"
-    href="#">Siguiente</a></li>`;
+      <li class="page-item">
+        <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded-full text-gray-800 hover:text-gray-800 hover:bg-gray-200 focus:shadow-none"
+          href="#">Siguiente</a>
+      </li>
+      `;
     } else {
       containerPagination.className = "container hidden";
     }
@@ -238,6 +305,14 @@ function listenerPopovers() {
   });
 }
 
+function getLastPageSelected() {
+  return getItemByKey("lastPageSelected");
+}
+
+function setLastPageSelected(page) {
+  setItem("lastPageSelected", page);
+}
+
 function listeners() {
   clickBtnAgregar();
   clicBtnsPagination();
@@ -247,8 +322,12 @@ function listeners() {
 function init() {
   selectDropDownItem();
   pushPaginationHtml();
-  selectPaginationHmlt(1);
-  pushImagesPageHtml(1);
+  let lastPg = getLastPageSelected();
+  if (!lastPg) {
+    lastPg = 1;
+  }
+  selectPaginationHmlt(lastPg);
+  pushImagesPageHtml(lastPg);
 }
 
 init();
